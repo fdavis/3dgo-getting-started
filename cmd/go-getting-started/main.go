@@ -19,6 +19,7 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 	"math"
@@ -28,6 +29,8 @@ import (
 
 	_ "github.com/lib/pq"
 )
+
+var db *sql.DB = nil
 
 const (
 	width, height = 600, 320            // canvas size in pixels
@@ -41,11 +44,16 @@ const (
 var sin30, cos30 = math.Sin(angle), math.Cos(angle) // sin(30),cos(30)
 
 func main() {
-	var err, errd error
+	var errd error
 	port := os.Getenv("PORT")
 
 	if port == "" {
 		log.Fatal("$PORT must be set")
+	}
+
+	db, errd = sql.Open("postgres", os.Getenv("DATABASE_URL"))
+	if errd != nil {
+		log.Fatalf("Error opening database: %q", errd)
 	}
 	http.HandleFunc("/", handler)  //each request calls handler
 	http.HandleFunc("/db", dbFunc) //each request calls handler
