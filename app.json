@@ -1,5 +1,5 @@
 {
-  "name": "go-getting-started",
+  "name": "3dgo-getting-started",
   "description": "Go Getting Started Example App",
   "keywords": [
     "getting-started",
@@ -8,7 +8,7 @@
     "example"
   ],
   "image": "heroku/go:1.6",
-  "mount_dir": "src/github.com/heroku/go-getting-started",
-  "website": "http://github.com/heroku/go-getting-started",
-  "repository": "http://github.com/heroku/go-getting-started"
+  "mount_dir": "src/github.com/fdavis/3dgo-getting-started",
+  "website": "http://github.com/fdavis/3dgo-getting-started",
+  "repository": "http://github.com/fdavis/3dgo-getting-started"
 }
