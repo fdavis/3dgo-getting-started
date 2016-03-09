@@ -24,6 +24,7 @@ import (
 	"math"
 	"net/http"
 	"os"
+	"time"
 )
 
 const (
@@ -38,8 +39,14 @@ const (
 var sin30, cos30 = math.Sin(angle), math.Cos(angle) // sin(30),cos(30)
 
 func main() {
+	var err, errd error
 	port := os.Getenv("PORT")
-	http.HandleFunc("/", handler) //each request calls handler
+
+	if port == "" {
+		log.Fatal("$PORT must be set")
+	}
+	http.HandleFunc("/", handler)  //each request calls handler
+	http.HandleFunc("/db", dbFunc) //each request calls handler
 	log.Fatal(http.ListenAndServe("0.0.0.0:"+port, nil))
 }
 
@@ -89,4 +96,32 @@ func corner(i, j int) (float64, float64) {
 func f(x, y float64) float64 {
 	r := math.Hypot(x, y) // distance from (0,0)
 	return math.Sin(r) / r
+}
+
+func dbFunc(w http.ResponseWriter, r *http.Request) {
+	if _, err := db.Exec("CREATE TABLE IF NOT EXISTS ticks (tick timestamp)"); err != nil {
+		fmt.Fprintln(w, "Error creating database table: %q", err)
+		return
+	}
+
+	if _, err := db.Exec("INSERT INTO ticks VALUES (now())"); err != nil {
+		fmt.Fprintln(w, "Error incrementing tick: %q", err)
+		return
+	}
+
+	rows, err := db.Query("SELECT tick FROM ticks")
+	if err != nil {
+		fmt.Fprintln(w, "Error reading tick: %q", err)
+		return
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+		var tick time.Time
+		if err := rows.Scan(&tick); err != nil {
+			fmt.Fprintln(w, "Error scanning tick: %q", err)
+			return
+		}
+		fmt.Fprintln(w, "Read from DB: %s\n", tick.String())
+	}
 }
